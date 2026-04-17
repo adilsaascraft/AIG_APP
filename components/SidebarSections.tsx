@@ -5,7 +5,18 @@ import {
   FaPoll,
   FaComment,
   FaQuestionCircle,
+  FaUser,
+  FaDownload,
+  FaClock,
+  FaCalendar,
+  FaCalculator,
+  FaMicroblog,
+  FaMagic,
+  FaLink,
+  FaFileContract,
+  FaPhone,
 } from "react-icons/fa"
+import { Fa5 } from "react-icons/fa6"
 
 export interface SubTab {
   name: string
@@ -26,6 +37,11 @@ const sideTabs: SideTab[] = [
     icon: FaHome,
     baseUrl: "dashboard",
   },
+    {
+    name: "Event Info",
+    icon: FaClock,
+    baseUrl: "event-info",
+  },
   {
     name: "Committee",
     icon: FaUsers,
@@ -35,33 +51,70 @@ const sideTabs: SideTab[] = [
       { name: "Committee Member", icon: FaUsers, path: "committee-member" },
     ],
   },
+    {
+    name: "Agenda",
+    icon: FaCalendar,
+    baseUrl: "agenda",
+    subtabs: [
+      { name: "Session Date", icon: FaUsers, path: "session-date" },
+      { name: "Track", icon: FaUsers, path: "track" },
+      { name: "Session Details", icon: FaUsers, path: "session-details" },
+    ],
+  },
+      {
+    name: "Speaker",
+    icon: FaMagic,
+    baseUrl: "speaker",
+    subtabs: [
+      { name: "Speaker Type", icon: FaUsers, path: "speaker-type" },
+      { name: "Speaker Members", icon: FaUsers, path: "speaker-member" },
+    ],
+  },
+    {
+    name: "Delegate",
+    icon: FaUsers,
+    baseUrl: "delegate",
+  },
+      {
+    name: "Download",
+    icon: FaDownload,
+    baseUrl: "download",
+  },
+
+  {
+    name: "Quicklinks",
+    icon: FaLink,
+    baseUrl: "quicklink",
+  },
+    {
+    name: "Quiz",
+    icon: FaQuestionCircle,
+    baseUrl: "quiz",
+  },
   {
     name: "Polls",
     icon: FaPoll,
     baseUrl: "polls",
   },
-  {
-    name: "Quiz",
-    icon: FaQuestionCircle,
-    baseUrl: "quiz",
-    subtabs: [
-      { name: "Detail", icon: FaQuestionCircle, path: "detail" },
-    ],
-  },
-  {
-    name: "Comments",
-    icon: FaComment,
-    baseUrl: "comment",
-  },
-  {
-    name: "Users",
+    {
+    name: "Exhibitor",
     icon: FaUsers,
-    baseUrl: "user",
+    baseUrl: "exhibitor",
     subtabs: [
-      { name: "Add User", icon: FaUsers, path: "add-user" },
-      { name: "All Users", icon: FaUsers, path: "get-all" },
-      { name: "Analysis", icon: FaUsers, path: "analysis" },
+      { name: "Exhibitor Type", icon: FaUsers, path: "exhibitor-type" },
+      { name: "Exhibitor Members", icon: FaUsers, path: "exhibitor-members" },
     ],
+  },
+
+  {
+    name: "Push Message",
+    icon: FaComment,
+    baseUrl: "push-message",
+  },
+    {
+    name: "Contact",
+    icon: FaPhone,
+    baseUrl: "contact",
   },
 ]
 
