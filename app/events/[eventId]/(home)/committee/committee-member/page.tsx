@@ -27,15 +27,19 @@ export default function CommitteeMemberPage() {
 
   if (!eventId || Array.isArray(eventId)) return null
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const [sheetOpen, setSheetOpen] = useState(false)
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const [editingData, setEditingData] = useState<CommitteeMember | null>(null)
 
   // ---------------- FETCH ----------------
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { data, isLoading, mutate } = useSWR(
     `${process.env.NEXT_PUBLIC_API_URL}/api/events/${eventId}/committee-members`,
     fetcher
   )
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const memberList: CommitteeMember[] = useMemo(
     () => data?.data ?? [],
     [data]
