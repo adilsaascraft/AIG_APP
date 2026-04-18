@@ -1,108 +1,153 @@
-'use client';
-//This file is a client component in Next.js, which allows us to use hooks like useState and useEffect. 
-import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+"use client"
 
-export default function ComingSoonPage() {
-  const calculateTimeLeft = () => {
-    const target = new Date("2025-08-01T00:00:00");
-    const now = new Date();
-    const difference = +target - +now;
-    let timeLeft = { days: 0, hours: 0, minutes: 0, seconds: 0 };
+import { useParams } from "next/navigation"
+import { useState, useMemo } from "react"
+import useSWR from "swr"
 
-    if (difference > 0) {
-      timeLeft = {
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
-        seconds: Math.floor((difference / 1000) % 60),
-      };
-    }
+import { Button } from "@/components/ui/button"
+import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { DataTable } from "@/components/DataTable"
+import { ColumnDef } from "@tanstack/react-table"
 
-    return timeLeft;
-  };
+import { z } from "zod"
+import { DownloadSchema } from "@/validations/download"
+import AddDownloadForm from "@/components/forms/AddDownloadForm"
 
-  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-  const [isClient, setIsClient] = useState(false);
+import { fetcher } from "@/lib/fetcher"
+import EntitySkeleton from "@/components/EntitySkeleton"
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsClient(true); 
-    setTimeLeft(calculateTimeLeft());
+// ---------------- TYPES ----------------
+type Download = z.infer<typeof DownloadSchema> & {
+  _id: string
+}
 
-    const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft());
-    }, 1000);
+// ---------------- PAGE ----------------
+export default function DownloadPage() {
+  const { eventId } = useParams()
 
-    return () => clearInterval(timer);
-  }, []);
+  if (!eventId || Array.isArray(eventId)) return null
+
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const [editingData, setEditingData] = useState<Download | null>(null)
+
+  // ---------------- FETCH ----------------
+  const { data, isLoading, mutate } = useSWR(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/events/${eventId}/downloads`,
+    fetcher
+  )
+
+  const downloadList: Download[] = useMemo(
+    () => data?.data ?? [],
+    [data]
+  )
+
+  // ---------------- HANDLERS ----------------
+  const handleAdd = () => {
+    setEditingData(null)
+    setSheetOpen(true)
+  }
+
+  const handleEdit = (item: Download) => {
+    setEditingData(item)
+    setSheetOpen(true)
+  }
+
+  const handleSaved = async () => {
+    setSheetOpen(false)
+    setEditingData(null)
+    await mutate()
+  }
+
+  // ---------------- TABLE ----------------
+  const columns: ColumnDef<Download>[] = [
+    {
+      accessorKey: "title",
+      header: "Title",
+    },
+    {
+      accessorKey: "file",
+      header: "File",
+      cell: ({ row }) => (
+        <a
+          href={row.original.file}
+          target="_blank"
+          className="text-blue-600 underline text-sm"
+        >
+          View File
+        </a>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => {
+        const isActive = row.original.status === "active"
+        return (
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-medium ${
+              isActive
+                ? "bg-green-100 text-green-800"
+                : "bg-gray-200 text-gray-700"
+            }`}
+          >
+            {row.original.status}
+          </span>
+        )
+      },
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => handleEdit(row.original)}
+        >
+          Edit
+        </Button>
+      ),
+    },
+  ]
+
+  // ---------------- UI ----------------
+  if (isLoading) return <EntitySkeleton title="Downloads" />
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-white px-4">
-      <div className="text-center max-w-md w-full">
-        <motion.h1
-          className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          Divina is currently working hard on this page!
-        </motion.h1>
+    <div className="p-4 bg-background text-foreground">
 
-        <motion.p
-          className="text-gray-500 mb-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          Website currently under maintenance
-        </motion.p>
+      {/* HEADER */}
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Downloads</h1>
 
-        <motion.div
-          className="flex justify-center mb-6"
-          initial={{ scale: 0.95 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.5 }}
+        <Button
+          onClick={handleAdd}
+          className="bg-sky-800 hover:bg-sky-900 text-white"
         >
-          <Image
-            src="/comming-soon.png"
-            alt="Maintenance"
-            width={300}
-            height={300}
-            className="w-full max-w-xs"
-            priority
-          />
-        </motion.div>
-
-        {isClient && (
-          <div className="flex justify-center gap-4 text-lg font-semibold text-gray-800 mb-6">
-            <div className="text-center">
-              <div className="text-3xl">{timeLeft.days}</div>
-              <div className="text-sm text-gray-500">Days</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl">{timeLeft.hours}</div>
-              <div className="text-sm text-gray-500">Hours</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl">{timeLeft.minutes}</div>
-              <div className="text-sm text-gray-500">Minutes</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl">{timeLeft.seconds}</div>
-              <div className="text-sm text-gray-500">Seconds</div>
-            </div>
-          </div>
-        )}
-
-        <Link
-          href="https://saascraft.studio/"
-          className="inline-block bg-gray-900 text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition"
-        >
-         Owned by SaaScraft Studio (India) Pvt. Ltd.
-        </Link>
+          + Add File
+        </Button>
       </div>
-    </main>
-  );
+
+      {/* TABLE */}
+      <DataTable data={downloadList} columns={columns} />
+
+      {/* SHEET */}
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <SheetContent className="w-[500px] sm:w-[600px] overflow-y-auto">
+
+          <div className="p-4 border-b">
+            <h2 className="text-xl font-semibold">
+              {editingData ? "Edit File" : "Upload File"}
+            </h2>
+          </div>
+
+          <AddDownloadForm
+            defaultValues={editingData || undefined}
+            onSave={handleSaved}
+          />
+
+        </SheetContent>
+      </Sheet>
+    </div>
+  )
 }
