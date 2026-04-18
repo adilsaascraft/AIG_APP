@@ -3,41 +3,56 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 // Refresh token function
 async function refreshAccessToken() {
   try {
-    const res = await fetch(`${BASE_URL}/api/admin/refresh-token`, {
+    const res = await fetch(`${BASE_URL}/api/event-admin/refresh-token`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      credentials: "include", // send refreshToken cookie
+      credentials: "include", // refreshToken cookie
     });
 
     const json = await res.json();
     if (!res.ok) throw new Error(json?.message || "Refresh failed");
 
-    localStorage.setItem("token", json.accessToken); // update accessToken
+    localStorage.setItem("token", json.accessToken);
     return json.accessToken;
   } catch (err) {
     console.error("Refresh token failed:", err);
+
+    // 🔥 FORCE LOGOUT WHEN REFRESH FAILS
     localStorage.removeItem("token");
+    window.location.href = "/login";
+
     return null;
   }
 }
 
 /**
- * API helper
- * Automatically attaches accessToken for protected routes
- * and retries once on 401 using refresh token
+ * Global API helper
+ * - Auto attaches accessToken
+ * - Auto refreshes on 401 once
+ * - Auto logout if refresh fails
  */
 export async function api(endpoint: string, options: RequestInit = {}) {
-  // List of public endpoints that do NOT require a token
   const publicEndpoints = ["/login", "/forgot-password", "/reset-password"];
 
   let token: string | null = null;
 
-  if (!publicEndpoints.some((path) => endpoint.startsWith(path))) {
+  // Protected route → requires token
+  const isProtected = !publicEndpoints.some((path) =>
+    endpoint.startsWith(path)
+  );
+
+  if (isProtected) {
     token = localStorage.getItem("token");
+
+    // 🔥 No token available → logout immediately
+    if (!token) {
+      window.location.href = "/login";
+      throw new Error("No token found. Redirecting to login.");
+    }
   }
 
   const makeRequest = async () =>
-    fetch(`${BASE_URL}/api/admin${endpoint}`, {
+    fetch(`${BASE_URL}/api/event-admin${endpoint}`, {
       headers: {
         "Content-Type": "application/json",
         ...(options.headers || {}),
@@ -49,11 +64,15 @@ export async function api(endpoint: string, options: RequestInit = {}) {
 
   let res = await makeRequest();
 
-  // If access token expired, try refreshing once (only for protected endpoints)
-  if (res.status === 401 && token) {
+  // 🔥 If token expired → try refresh ONCE
+  if (res.status === 401 && isProtected) {
     token = await refreshAccessToken();
     if (token) {
-      res = await makeRequest(); // retry original request
+      // retry API call with new token
+      res = await makeRequest();
+    } else {
+      // refresh failed → already redirected in refreshAccessToken()
+      throw new Error("Session expired. Redirecting to login.");
     }
   }
 
@@ -62,6 +81,13 @@ export async function api(endpoint: string, options: RequestInit = {}) {
     json = await res.json();
   } catch {
     throw new Error("Invalid server response");
+  }
+
+  // 🔥 If still unauthorized → force logout
+  if (!res.ok && res.status === 401) {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+    throw new Error("Unauthorized. Redirecting to login.");
   }
 
   if (!res.ok) throw new Error(json?.message || "Request failed");
