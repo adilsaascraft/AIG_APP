@@ -42,6 +42,16 @@ const sideTabs: SideTab[] = [
     icon: FaClock,
     baseUrl: "event-info",
   },
+   {
+    name: "Image Slider",
+    icon: FaMicroblog,
+    baseUrl: "image-slider",
+    subtabs: [
+      { name: "Slider", icon: FaUsers, path: "slider" },
+      { name: "Inner Slider", icon: FaUsers, path: "inner-slider" },
+      {name:"Outer Slider", icon: FaUsers, path:"outer-slider"},
+    ],
+  },
   {
     name: "Committee",
     icon: FaUsers,
@@ -91,11 +101,11 @@ const sideTabs: SideTab[] = [
     icon: FaQuestionCircle,
     baseUrl: "quiz",
   },
-  {
-    name: "Polls",
-    icon: FaPoll,
-    baseUrl: "polls",
-  },
+  // {
+  //   name: "Polls",
+  //   icon: FaPoll,
+  //   baseUrl: "polls",
+  // },
     {
     name: "Exhibitor",
     icon: FaUsers,
@@ -115,6 +125,10 @@ const sideTabs: SideTab[] = [
     name: "Contact",
     icon: FaPhone,
     baseUrl: "contact",
+    subtabs: [
+      { name: "Contact Info", icon: FaUsers, path: "contact-info" },
+      { name: "Contact Response", icon: FaUsers, path: "contact-response" },
+    ],
   },
 ]
 
