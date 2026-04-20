@@ -15,6 +15,7 @@ import {
   FaLink,
   FaFileContract,
   FaPhone,
+  FaBook,
 } from "react-icons/fa"
 import { Fa5 } from "react-icons/fa6"
 
@@ -70,6 +71,11 @@ const sideTabs: SideTab[] = [
       { name: "Track", icon: FaUsers, path: "track" },
       { name: "Session Details", icon: FaUsers, path: "session-details" },
     ],
+  },
+  {
+    name: "Abstarct",
+    icon: FaBook,
+    baseUrl: "abstract",
   },
       {
     name: "Speaker",
