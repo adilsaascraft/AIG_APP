@@ -30,7 +30,8 @@ export default function EventCard({ event, onEdit, onDelete }: Props) {
   }
 
   function handleNavigate() {
-    router.push(`/events/${event.id}/dashboard`)
+    // router.push(`/events/${event.id}/dashboard`)
+    router.push(`/events/${event.id}/event-info`)
   }
 
   return (
