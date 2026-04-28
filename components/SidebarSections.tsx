@@ -33,11 +33,11 @@ export interface SideTab {
 }
 
 const sideTabs: SideTab[] = [
-  {
-    name: "Dashboard",
-    icon: FaHome,
-    baseUrl: "dashboard",
-  },
+  // {
+  //   name: "Dashboard",
+  //   icon: FaHome,
+  //   baseUrl: "dashboard",
+  // },
     {
     name: "Event Info",
     icon: FaClock,
