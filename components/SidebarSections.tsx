@@ -133,7 +133,7 @@ const sideTabs: SideTab[] = [
     baseUrl: "contact",
     subtabs: [
       { name: "Contact Info", icon: FaUsers, path: "contact-info" },
-      { name: "Contact Response", icon: FaUsers, path: "contact-response" },
+      // { name: "Contact Response", icon: FaUsers, path: "contact-response" },
     ],
   },
 ]
